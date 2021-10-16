@@ -1,66 +1,76 @@
-'''Este test realiza un post, put y get a la API de Pet Store de Swagger UI'https://petstore.swagger.io/'''
-
-import requests
 import json
-import unittest
 from apis.base_api_pet_store import BaseApiPetStore
-
-__pdoc__ = {}
-
-__pdoc__["TestApiPostPetStore"] = False
+from apis.body.body_pet_store import BodyPetStore
+from utils.utils import random_number
 
 
-class TestsApiPetStore(unittest.TestCase):
+class TestApiStore:
 
-    def setUp(self):
-        self.apiBasePetStore = BaseApiPetStore()
+    @classmethod
+    def setup_class(cls):
+        print("Pre-Condiciones")
+        cls.randomNum = random_number()
 
-    def test_post_api_pet_store(self):
-        """Este tests envía un post a la url del pet store y valida sus datos"""
+    def test_add_new_pet_validate(self):
+        """Este test agrega una nueva mascota y valida que se haya hecho de manera correcta, status code 200"""
 
-        response = requests.post(self.apiBasePetStore.url, headers=self.apiBasePetStore.headers,
-                                 data=self.apiBasePetStore.body)
+        response = BaseApiPetStore.post_new_pet(data=BodyPetStore.body_add_pet(name="Lola",
+                                                                               type="Dog",
+                                                                               status="Available",
+                                                                               num=self.randomNum))
+        status_code = response.status_code
         json_response = json.loads(response.text)
         print(json.dumps(json_response, indent=3))
 
-        assert response.status_code == 200
-        assert json_response['id'] == 501, 'Not match'
-        assert json_response['category']['name'] == 'Perros', 'Not match'
-        assert json_response['tags'][0]['name'] == 'Rita', 'Not match'
+        assert status_code == 200
 
-    def test_api_pet_store_put(self):
-        """Este tests hace un put a la url, cmabiando el nombre de la mascota
-        Este test realiza un PUT a la API de Pet Store de Swagger UI'https://petstore.swagger.io/"""
+    def test_get_body_by_id(self):
+        """Este test agrega una nueva mascota, después realiza un get de la misma y valida status code 200"""
 
-        response = requests.put(self.apiBasePetStore.url, headers=self.apiBasePetStore.headers,
-                                data=self.apiBasePetStore.body_put)
+        response = BaseApiPetStore.post_new_pet(data=BodyPetStore.body_add_pet(name="Luna",
+                                                                               type="Dog",
+                                                                               status="Available",
+                                                                               num=self.randomNum))
         json_response = json.loads(response.text)
         print(json.dumps(json_response, indent=3))
 
-        assert response.status_code == 200
-        assert json_response['id'] is not None, "Is empty"
-        assert json_response['category']['name'] == "Conejo Malo", 'Not match'
-        assert json_response['category']['id'] == 3, 'Not match'
+        id_pet = json_response['id']
 
-    def test_api_pet_store_get(self):
-        '''Este tests verifica, a través del método GET, que los datos que devuelve la petición a la apis sean
-        correctos, Este test realiza un GET a la API de Pet Store de Swagger UI'https://petstore.swagger.io/
-        URL: https://petstore.swagger.io/v2/pet/2 y valida los datos
-        Pre- requisitos: Se debe correr el test_api_pet_store_post previamente
-        '''
+        response_get = BaseApiPetStore.get_pet_by_id(id_pet=id_pet)
 
-        response = requests.get(self.apiBasePetStore.url_id)
+        assert response_get.status_code == 200
+
+    def test_delete_pet_by_id(self):
+        """Este test primero crea una mascota y deespues la elimina por id"""
+
+        response = BaseApiPetStore.post_new_pet(data=BodyPetStore.body_add_pet(name="Luna",
+                                                                               type="Dog",
+                                                                               status="Available",
+                                                                               num=self.randomNum))
         json_response = json.loads(response.text)
         print(json.dumps(json_response, indent=3))
 
-        assert response.status_code == 200
-        assert json_response['id'] == 501, 'Not match'
-        assert json_response['name'] == 'Luna', 'Non match'
-        assert json_response['category']['name'] == 'Perros', 'Not match'
+        id_pet = json_response['id']
 
-    def tearDown(self):
-        pass
+        response_get = BaseApiPetStore.delete_pet_by_id(id_pet=id_pet)
 
+        assert response_get.status_code == 200
 
-if __name__ == '__main__':
-    unittest.main()
+    def test_put_existing_pet_by_id(self):
+        """Este test primero crea una mascota y deespues la actualiza por id"""
+
+        response = BaseApiPetStore.post_new_pet(data=BodyPetStore.body_add_pet(name="Luna",
+                                                                               type="Dog",
+                                                                               status="Available",
+                                                                               num=self.randomNum))
+        json_response = json.loads(response.text)
+        print(json.dumps(json_response, indent=3))
+
+        id_pet = json_response['id']
+
+        response_get = BaseApiPetStore.post_new_pet(data=BodyPetStore.body_add_pet(name="Lola",
+                                                                                   type="Dog",
+                                                                                   status="OK",
+                                                                                   num=id_pet))
+
+        assert response_get.status_code == 200

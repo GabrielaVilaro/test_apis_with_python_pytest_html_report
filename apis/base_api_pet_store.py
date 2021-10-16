@@ -1,53 +1,51 @@
+import json
+
+import requests
+from apis import initialize
+
+
 class BaseApiPetStore:
-    def __init__(self, url=f"https://petstore.swagger.io/v2/pet",
-                 headers={"Content-Type": "application/json", "accept": "application/json"}, body="""{
-          "id": 501,
-          "category": {
-            "id": 3,
-            "name": "Perros"
-          },
-          "name": "Luna",
-          "photoUrls": [
-            "url1",
-            "url2"
-          ],
-          "tags": [
-            {
-              "id": 1,
-              "name": "Rita"
-            },
-            {
-              "id": 2,
-              "name": "Lola"
-            }
-          ],
-          "status": "available"
-        }""", body_put="""{
-          "id": 10,
-          "category": {
-            "id": 3,
-            "name": "Conejo Malo"
-          },
-          "name": "Bod Conejito",
-          "photoUrls": [
-            "https://i.ytimg.com/vi/SfLV8hD7zX4/maxresdefault.jpg",
-            "url2"
-          ],
-          "tags": [
-            {
-              "id": 1,
-              "name": "tag3"
-            },
-            {
-              "id": 2,
-              "name": "tag4"
-            }
-          ],
-          "status": "available"
-        }"""):
-        self.url = url
-        self.ID = '/501'
-        self.url_id = self.url + self.ID
-        self.headers = headers
-        self.body = body
-        self.body_put = body_put
+
+    @staticmethod
+    def post_new_pet(data):
+        """:param data: body json
+        :return: response json body"""
+
+        response = requests.post(url=initialize.BASE_URL_PET + f"pet",
+                                 data=json.dumps(data),
+                                 headers=initialize.API_HEADER)
+
+        return response
+
+    @staticmethod
+    def get_pet_by_id(id_pet):
+        """:param data: body json
+        :param id_pet: int
+        :return: response json body"""
+
+        response = requests.get(url=initialize.BASE_URL_PET + f"pet/{id_pet}",
+                                 headers=initialize.API_HEADER)
+
+        return response
+
+    @staticmethod
+    def delete_pet_by_id(id_pet):
+        """:param data: body json
+              :return: response json body"""
+
+        response = requests.delete(url=initialize.BASE_URL_PET + f"pet/{id_pet}",
+                                 headers=initialize.API_HEADER)
+
+        return response
+
+    @staticmethod
+    def put_existing_pet(data):
+        """:param data: body json
+        :return: response json body"""
+
+        response = requests.put(url=initialize.BASE_URL_PET + f"pet",
+                                 data=json.dumps(data),
+                                 headers=initialize.API_HEADER)
+
+        return response
+
